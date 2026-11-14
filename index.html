@@ -290,27 +290,6 @@
         </p>
       </div>
 
-      <!-- Teacher Settings Accordion (Google Sheets Webhook) -->
-      <div class="max-w-md mx-auto mb-6 text-left">
-        <button type="button" onclick="toggleSheetsConfig()" class="text-xs font-semibold text-gray-700 hover:text-black underline flex items-center gap-1.5 mx-auto">
-          <span>⚙️ Налаштування Google Таблиці (для вчителя)</span>
-        </button>
-        <div id="sheets-config-panel" class="hidden mt-2.5 p-3.5 bg-[#b3b3b3] border-2 border-[#555] text-xs space-y-2">
-          <label for="sheets-url-input" class="block font-bold text-gray-900">
-            URL веб-додатку Google Apps Script:
-          </label>
-          <input 
-            type="url" 
-            id="sheets-url-input" 
-            placeholder="https://script.google.com/macros/s/.../exec"
-            class="w-full px-2.5 py-1.5 bg-white text-gray-900 border border-gray-600 focus:outline-none"
-          />
-          <p class="text-[11px] text-gray-700 leading-snug">
-            Вставте сюди посилання розгорнутого Apps Script. Дані відправлятимуться автоматично після завершення тесту.
-          </p>
-        </div>
-      </div>
-
       <button onclick="startQuiz()" class="mc-btn mc-btn-green font-pixel text-xs sm:text-sm px-8 py-4">
         ▶ РОЗПОЧАТИ ПРИГОДУ
       </button>
@@ -552,11 +531,6 @@
       if (e.key === 'Enter') startQuiz();
     });
 
-    function toggleSheetsConfig() {
-      const panel = document.getElementById('sheets-config-panel');
-      panel.classList.toggle('hidden');
-    }
-
     function clearNameError() {
       document.getElementById('name-error').classList.add('hidden');
     }
@@ -666,26 +640,24 @@
         feedbackBox.className = 'mb-5 p-4 border-2 bg-[#dff2cf] border-[#4e7529] text-sm sm:text-base';
         feedbackTitle.className = 'font-bold mb-1 text-[#2b520d]';
         feedbackTitle.textContent = '💎 Чудово! Ти добув алмаз!';
+        feedbackText.textContent = q.rationale;
       } else {
         clickedBtn.classList.add('selected-wrong');
-        allBtns[q.correctIndex].classList.add('selected-correct');
         if (hearts > 0) hearts--;
         renderHearts();
 
         mistakes.push({
           number: currentIdx + 1,
           question: q.question,
-          yourAnswer: q.options[selectedIndex],
-          correctAnswer: q.options[q.correctIndex],
-          rationale: q.rationale
+          yourAnswer: q.options[selectedIndex]
         });
 
         feedbackBox.className = 'mb-5 p-4 border-2 bg-[#fad9d9] border-[#9e2a2a] text-sm sm:text-base';
         feedbackTitle.className = 'font-bold mb-1 text-[#7d1919]';
-        feedbackTitle.textContent = '💥 Ой! Кріпер підірвав розрахунки!';
+        feedbackTitle.textContent = '💥 Ой! Кріпер підірвав розрахунки! Відповідь неправильна.';
+        feedbackText.textContent = 'Спробуй проаналізувати умову уважніше наступного разу.';
       }
 
-      feedbackText.textContent = q.rationale;
       feedbackBox.classList.remove('hidden');
 
       const nextBtn = document.getElementById('next-btn');
@@ -756,9 +728,7 @@
           item.className = 'bg-[#d9d9d9] border-2 border-[#7a7a7a] p-3 text-xs sm:text-sm';
           item.innerHTML = `
             <p class="font-bold text-gray-900 mb-1">Завдання №${m.number}: ${m.question}</p>
-            <p class="text-[#8f1d1d]">Твоя відповідь: <span class="line-through">${m.yourAnswer}</span></p>
-            <p class="text-[#265409] font-semibold">Правильно: ${m.correctAnswer}</p>
-            <p class="text-gray-700 mt-1 text-xs">${m.rationale}</p>
+            <p class="text-[#8f1d1d]">Твоя відповідь: <span class="line-through">${m.yourAnswer}</span> (Неправильно)</p>
           `;
           reviewList.appendChild(item);
         });
@@ -768,8 +738,7 @@
     }
 
     async function sendResultsToGoogleSheets(payloadData) {
-      const customUrl = document.getElementById('sheets-url-input').value.trim();
-      const scriptUrl = customUrl || DEFAULT_GOOGLE_SCRIPT_URL;
+      const scriptUrl = DEFAULT_GOOGLE_SCRIPT_URL;
       const banner = document.getElementById('sheets-status-banner');
       const statusIcon = document.getElementById('sheets-status-icon');
       const statusText = document.getElementById('sheets-status-text');
