@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minecraft Математика: Відсотки (6 клас)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --mc-grass: #5b8731;
+      --mc-grass-dark: #3f6120;
+      --mc-dirt: #79553a;
+      --mc-dirt-dark: #523926;
+      --mc-stone: #8b8b8b;
+      --mc-stone-light: #c6c6c6;
+      --mc-stone-dark: #373737;
+      --mc-panel: #c6c6c6;
+      --mc-diamond: #4aedd9;
+      --mc-gold: #fcee4b;
+      --mc-emerald: #17dd62;
+      --mc-redstone: #ff3333;
+    }
+
+    body {
+      font-family: 'Rubik', sans-serif;
+      background-color: #2b1d12;
+      background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.7)),
+        repeating-linear-gradient(0deg, transparent, transparent 31px, rgba(0,0,0,0.15) 31px, rgba(0,0,0,0.15) 32px),
+        repeating-linear-gradient(90deg, transparent, transparent 31px, rgba(0,0,0,0.15) 31px, rgba(0,0,0,0.15) 32px),
+        radial-gradient(circle at 20% 20%, #4e3623 0%, #3a2718 100%);
+      color: #1f1f1f;
+      min-height: 100vh;
+      user-select: none;
+    }
+
+    .font-pixel {
+      font-family: 'Press Start 2P', monospace;
+      line-height: 1.5;
+    }
+
+    /* Classic Minecraft UI Panel */
+    .mc-panel {
+      background-color: #c6c6c6;
+      border-top: 4px solid #ffffff;
+      border-left: 4px solid #ffffff;
+      border-right: 4px solid #555555;
+      border-bottom: 4px solid #555555;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Minecraft Inner Slot / Well */
+    .mc-slot {
+      background-color: #8b8b8b;
+      border-top: 3px solid #373737;
+      border-left: 3px solid #373737;
+      border-right: 3px solid #ffffff;
+      border-bottom: 3px solid #ffffff;
+    }
+
+    /* Minecraft Button */
+    .mc-btn {
+      background-color: #7d7d7d;
+      color: #ffffff;
+      text-shadow: 2px 2px 0px #3f3f3f;
+      border-top: 3px solid #ababab;
+      border-left: 3px solid #ababab;
+      border-right: 3px solid #474747;
+      border-bottom: 3px solid #474747;
+      transition: transform 0.05s, background-color 0.15s;
+      cursor: pointer;
+    }
+
+    .mc-btn:hover:not(:disabled) {
+      background-color: #6b8848;
+      border-top-color: #9bc46a;
+      border-left-color: #9bc46a;
+      border-right-color: #3b4f24;
+      border-bottom-color: #3b4f24;
+    }
+
+    .mc-btn:active:not(:disabled) {
+      transform: translateY(2px);
+      border-top-color: #474747;
+      border-left-color: #474747;
+      border-right-color: #ababab;
+      border-bottom-color: #ababab;
+    }
+
+    .mc-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .mc-btn-green {
+      background-color: #5b8731;
+      border-top-color: #84bd4d;
+      border-left-color: #84bd4d;
+      border-right-color: #355219;
+      border-bottom-color: #355219;
+    }
+
+    .mc-btn-green:hover:not(:disabled) {
+      background-color: #6a9c3a;
+    }
+
+    .mc-btn-gold {
+      background-color: #c79a1e;
+      border-top-color: #f7cf54;
+      border-left-color: #f7cf54;
+      border-right-color: #7a5c0b;
+      border-bottom-color: #7a5c0b;
+    }
+
+    .mc-btn-gold:hover:not(:disabled) {
+      background-color: #dba924;
+    }
+
+    /* Option Cards */
+    .mc-option {
+      background-color: #a8a8a8;
+      color: #1a1a1a;
+      border-top: 3px solid #dcdcdc;
+      border-left: 3px solid #dcdcdc;
+      border-right: 3px solid #595959;
+      border-bottom: 3px solid #595959;
+      transition: all 0.12s ease;
+    }
+
+    .mc-option:hover:not(.locked) {
+      background-color: #b8c9a9;
+      border-top-color: #e4f5d5;
+      border-left-color: #e4f5d5;
+      border-right-color: #546e3d;
+      border-bottom-color: #546e3d;
+      transform: translateY(-1px);
+    }
+
+    .mc-option.selected-correct {
+      background-color: #5b8731 !important;
+      color: #ffffff !important;
+      text-shadow: 1px 1px 0 #263b12;
+      border-top-color: #8fd150 !important;
+      border-left-color: #8fd150 !important;
+      border-right-color: #2d4714 !important;
+      border-bottom-color: #2d4714 !important;
+    }
+
+    .mc-option.selected-wrong {
+      background-color: #b83232 !important;
+      color: #ffffff !important;
+      text-shadow: 1px 1px 0 #4a1010;
+      border-top-color: #eb6a6a !important;
+      border-left-color: #eb6a6a !important;
+      border-right-color: #631616 !important;
+      border-bottom-color: #631616 !important;
+    }
+
+    /* Grass top header bar */
+    .mc-grass-bar {
+      height: 16px;
+      background: repeating-linear-gradient(
+        90deg,
+        #5b8731 0px,
+        #5b8731 16px,
+        #669638 16px,
+        #669638 32px,
+        #4e7529 32px,
+        #4e7529 48px
+      );
+      border-bottom: 4px solid #3c591f;
+    }
+
+    /* XP Progress Bar */
+    .xp-bar-bg {
+      background-color: #222621;
+      border: 2px solid #000000;
+      height: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    .xp-bar-fill {
+      background: linear-gradient(180deg, #8ce63c 0%, #5bb519 100%);
+      height: 100%;
+      transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+    .animate-float {
+      animation: floatSlow 2.8s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="p-3 sm:p-6 flex flex-col items-center justify-center">
+
+  <!-- Main Container -->
+  <div class="w-full max-w-3xl mc-panel overflow-hidden">
+    <div class="mc-grass-bar"></div>
+
+    <!-- Top Status Bar (Inventory / HUD style) -->
+    <div class="bg-[#373737] text-white px-4 py-3 flex flex-wrap items-center justify-between gap-3 border-b-4 border-[#1f1f1f]">
+      <div class="flex items-center gap-2.5">
+        <!-- SVG Crafting Table Icon -->
+        <svg class="w-8 h-8 shrink-0" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <rect width="16" height="16" fill="#6b4423"/>
+          <rect x="0" y="0" width="16" height="4" fill="#9c6b3e"/>
+          <rect x="2" y="1" width="3" height="2" fill="#4a2e16"/>
+          <rect x="7" y="1" width="3" height="2" fill="#4a2e16"/>
+          <rect x="12" y="1" width="2" height="2" fill="#4a2e16"/>
+          <rect x="2" y="5" width="5" height="9" fill="#523319"/>
+          <rect x="9" y="5" width="5" height="9" fill="#523319"/>
+          <rect x="3" y="6" width="3" height="3" fill="#828282"/>
+          <rect x="10" y="6" width="3" height="3" fill="#a84332"/>
+        </svg>
+        <div>
+          <h1 class="font-pixel text-xs sm:text-sm text-[#fcee4b] tracking-wide">MINECRAFT МАТЕМАТИКА</h1>
+          <p class="text-xs text-gray-300">6 клас • Тема: Відсотки</p>
+        </div>
+      </div>
+
+      <!-- HUD Stats: Hearts & Diamonds -->
+      <div id="hud-stats" class="hidden flex items-center gap-4">
+        <!-- Hearts -->
+        <div class="flex items-center gap-1" title="Життя">
+          <div id="hearts-container" class="flex gap-0.5"></div>
+        </div>
+
+        <!-- Diamonds Counter -->
+        <div class="flex items-center gap-1.5 bg-[#222] px-2.5 py-1 border-2 border-[#555]">
+          <svg class="w-5 h-5" viewBox="0 0 16 16" shape-rendering="crispEdges">
+            <rect x="6" y="2" width="4" height="2" fill="#aefcf2"/>
+            <rect x="4" y="4" width="8" height="2" fill="#4aedd9"/>
+            <rect x="3" y="6" width="10" height="4" fill="#2cc4b2"/>
+            <rect x="5" y="5" width="3" height="2" fill="#ffffff"/>
+            <rect x="4" y="10" width="8" height="2" fill="#1d9688"/>
+            <rect x="6" y="12" width="4" height="2" fill="#157065"/>
+          </svg>
+          <span id="diamond-count" class="font-pixel text-xs text-[#4aedd9]">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 1: START MENU -->
+    <div id="start-screen" class="p-6 sm:p-10 text-center">
+      <div class="flex justify-center mb-5">
+        <div class="mc-slot p-4 inline-block animate-float">
+          <!-- Big Pixel Diamond + % -->
+          <svg class="w-20 h-20" viewBox="0 0 16 16" shape-rendering="crispEdges">
+            <rect x="5" y="1" width="6" height="2" fill="#aefcf2"/>
+            <rect x="3" y="3" width="10" height="2" fill="#4aedd9"/>
+            <rect x="2" y="5" width="12" height="5" fill="#2cc4b2"/>
+            <rect x="4" y="4" width="3" height="3" fill="#ffffff"/>
+            <rect x="3" y="10" width="10" height="2" fill="#1d9688"/>
+            <rect x="5" y="12" width="6" height="2" fill="#157065"/>
+            <rect x="7" y="14" width="2" height="1" fill="#0e4f47"/>
+          </svg>
+        </div>
+      </div>
+
+      <h2 class="font-pixel text-base sm:text-xl text-[#2b2b2b] mb-4">КВЕСТ: ТАЄМНИЦІ ВІДСОТКІВ</h2>
+      
+      <div class="mc-slot p-4 mb-5 text-left text-gray-900 max-w-xl mx-auto space-y-2 text-sm sm:text-base">
+        <p class="font-semibold text-[#1f3b08]">Вітаємо у шахті знань, мандрівнику!</p>
+        <p>На тебе чекають <strong>10 математичних завдань</strong> із реальними ситуаціями зі світу Minecraft: стаки блоків, міцність кирок, торгівля смарагдами, зілля та зачарування.</p>
+        <ul class="list-disc list-inside text-sm text-gray-800 pt-1 space-y-1">
+          <li>За кожну правильну відповідь ти отримуєш <strong>1 алмаз</strong> 💎</li>
+          <li>Якщо виникнуть труднощі — скористайся <strong>Книгою підказок</strong> 📖</li>
+          <li>У кінці квесту ти отримаєш своє заслужене звання!</li>
+        </ul>
+      </div>
+
+      <!-- Player Name Input -->
+      <div class="max-w-md mx-auto mb-5 text-left">
+        <label for="player-name" class="block font-bold text-xs uppercase tracking-wider text-gray-800 mb-1.5">
+          ⛏️ Введи своє ім'я та прізвище (або нікнейм):
+        </label>
+        <input 
+          type="text" 
+          id="player-name" 
+          placeholder="Наприклад: Іван Петренко (6-А)" 
+          class="w-full px-3.5 py-2.5 bg-[#373737] text-white placeholder-gray-400 border-2 border-[#1f1f1f] focus:border-[#4aedd9] focus:outline-none text-sm sm:text-base font-medium"
+          oninput="clearNameError()"
+        />
+        <p id="name-error" class="hidden text-xs font-bold text-[#9e2a2a] mt-1">
+          ⚠️ Будь ласка, введи своє ім'я перед початком гри!
+        </p>
+      </div>
+
+      <!-- Teacher Settings Accordion (Google Sheets Webhook) -->
+      <div class="max-w-md mx-auto mb-6 text-left">
+        <button type="button" onclick="toggleSheetsConfig()" class="text-xs font-semibold text-gray-700 hover:text-black underline flex items-center gap-1.5 mx-auto">
+          <span>⚙️ Налаштування Google Таблиці (для вчителя)</span>
+        </button>
+        <div id="sheets-config-panel" class="hidden mt-2.5 p-3.5 bg-[#b3b3b3] border-2 border-[#555] text-xs space-y-2">
+          <label for="sheets-url-input" class="block font-bold text-gray-900">
+            URL веб-додатку Google Apps Script:
+          </label>
+          <input 
+            type="url" 
+            id="sheets-url-input" 
+            placeholder="https://script.google.com/macros/s/.../exec"
+            class="w-full px-2.5 py-1.5 bg-white text-gray-900 border border-gray-600 focus:outline-none"
+          />
+          <p class="text-[11px] text-gray-700 leading-snug">
+            Вставте сюди посилання розгорнутого Apps Script. Дані відправлятимуться автоматично після завершення тесту.
+          </p>
+        </div>
+      </div>
+
+      <button onclick="startQuiz()" class="mc-btn mc-btn-green font-pixel text-xs sm:text-sm px-8 py-4">
+        ▶ РОЗПОЧАТИ ПРИГОДУ
+      </button>
+    </div>
+
+    <!-- SCREEN 2: QUIZ GAMEPLAY -->
+    <div id="quiz-screen" class="hidden p-4 sm:p-7">
+      <!-- XP Progress Bar -->
+      <div class="mb-5">
+        <div class="flex justify-between items-center mb-1.5 text-xs font-bold text-gray-700">
+          <span>ЗАВДАННЯ <span id="q-current">1</span> З <span id="q-total">10</span></span>
+          <span id="q-topic-badge" class="bg-[#555] text-white px-2 py-0.5 text-[11px]">Стаки та блоки</span>
+        </div>
+        <div class="xp-bar-bg">
+          <div id="xp-fill" class="xp-bar-fill" style="width: 10%;"></div>
+        </div>
+      </div>
+
+      <!-- Question Box -->
+      <div class="mc-slot p-4 sm:p-5 mb-5 bg-[#9e9e9e]">
+        <div class="flex items-start gap-3.5">
+          <div id="q-icon" class="w-12 h-12 shrink-0 bg-[#6e6e6e] border-2 border-[#373737] flex items-center justify-center">
+            <!-- Dynamic SVG inserted by JS -->
+          </div>
+          <p id="q-text" class="text-base sm:text-lg font-medium text-gray-950 leading-relaxed"></p>
+        </div>
+      </div>
+
+      <!-- Hint Box (Hidden by default) -->
+      <div id="hint-box" class="hidden mb-5 bg-[#fdf6d8] border-2 border-[#c79a1e] p-3.5 text-sm text-[#594100] flex items-start gap-2.5">
+        <span class="text-lg leading-none">📖</span>
+        <div>
+          <span class="font-bold">Підказка з Книги знань:</span>
+          <span id="hint-text"></span>
+        </div>
+      </div>
+
+      <!-- Answer Options Grid -->
+      <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+        <!-- Buttons injected by JS -->
+      </div>
+
+      <!-- Feedback Rationale Box -->
+      <div id="feedback-box" class="hidden mb-5 p-4 border-2 text-sm sm:text-base">
+        <p id="feedback-title" class="font-bold mb-1"></p>
+        <p id="feedback-text" class="text-gray-900"></p>
+      </div>
+
+      <!-- Bottom Action Controls -->
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t-2 border-[#9e9e9e]">
+        <button id="hint-btn" onclick="toggleHint()" class="mc-btn mc-btn-gold text-xs sm:text-sm font-semibold px-4 py-2.5 flex items-center gap-2">
+          <span>📖</span> Підказка
+        </button>
+
+        <button id="next-btn" onclick="nextQuestion()" class="hidden mc-btn mc-btn-green font-pixel text-xs px-6 py-3">
+          ДАЛІ ➔
+        </button>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: RESULTS SCREEN -->
+    <div id="result-screen" class="hidden p-6 sm:p-9 text-center">
+      <div id="trophy-icon" class="flex justify-center mb-4 animate-float"></div>
+      
+      <div class="inline-block bg-[#373737] text-[#fcee4b] px-3 py-1 text-xs sm:text-sm font-bold mb-2 border border-[#1f1f1f]">
+        Гравець: <span id="result-player-name" class="text-white"></span>
+      </div>
+
+      <h2 id="rank-title" class="font-pixel text-sm sm:text-lg text-[#2b520d] mb-2">МАЙСТЕР АЛМАЗНИХ РОЗРАХУНКІВ</h2>
+      <p id="rank-subtitle" class="text-sm sm:text-base text-gray-800 mb-5 max-w-lg mx-auto"></p>
+
+      <!-- Google Sheets Sync Status Banner -->
+      <div id="sheets-status-banner" class="hidden max-w-md mx-auto mb-5 p-3 border-2 text-xs sm:text-sm font-medium flex items-center justify-center gap-2">
+        <span id="sheets-status-icon">⏳</span>
+        <span id="sheets-status-text">Відправка результату в Google Таблицю...</span>
+      </div>
+
+      <!-- Score Summary Panel -->
+      <div class="mc-slot p-5 max-w-md mx-auto mb-6 bg-[#a3a3a3]">
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="bg-[#8b8b8b] p-3 border-2 border-[#555]">
+            <div class="text-xs text-gray-200 mb-1">Алмази</div>
+            <div id="final-diamonds" class="font-pixel text-base sm:text-lg text-[#4aedd9]">0/10</div>
+          </div>
+          <div class="bg-[#8b8b8b] p-3 border-2 border-[#555]">
+            <div class="text-xs text-gray-200 mb-1">Точність</div>
+            <div id="final-percent" class="font-pixel text-base sm:text-lg text-[#fcee4b]">0%</div>
+          </div>
+          <div class="bg-[#8b8b8b] p-3 border-2 border-[#555]">
+            <div class="text-xs text-gray-200 mb-1">Помилок</div>
+            <div id="final-wrong" class="font-pixel text-base sm:text-lg text-[#ff6b6b]">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review Mistakes List (if any) -->
+      <div id="review-section" class="hidden text-left max-w-xl mx-auto mb-6">
+        <h3 class="font-bold text-sm uppercase tracking-wider text-gray-700 mb-2">Огляд складних завдань:</h3>
+        <div id="review-list" class="space-y-2 max-h-56 overflow-y-auto pr-1"></div>
+      </div>
+
+      <button onclick="restartQuiz()" class="mc-btn mc-btn-green font-pixel text-xs sm:text-sm px-7 py-4">
+        ↻ ЗІГРАТИ ЩЕ РАЗ
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // Pixel SVG Icons for Questions
+    const ICONS = {
+      cobble: `<svg class="w-8 h-8" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect width="16" height="16" fill="#7a7a7a"/><rect x="1" y="1" width="6" height="5" fill="#9c9c9c"/><rect x="8" y="2" width="7" height="4" fill="#636363"/><rect x="2" y="7" width="8" height="4" fill="#8c8c8c"/><rect x="11" y="7" width="4" height="7" fill="#9c9c9c"/><rect x="1" y="12" width="9" height="3" fill="#5e5e5e"/></svg>`,
+      pickaxe: `<svg class="w-8 h-8" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="4" y="2" width="8" height="2" fill="#d8d8d8"/><rect x="2" y="4" width="3" height="2" fill="#b0b0b0"/><rect x="11" y="4" width="3" height="2" fill="#b0b0b0"/><rect x="7" y="4" width="2" height="10" fill="#875c32"/></svg>`,
+      emerald: `<svg class="w-8 h-8" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="5" y="2" width="6" height="2" fill="#6ef79e"/><rect x="4" y="4" width="8" height="8" fill="#17dd62"/><rect x="6" y="5" width="2" height="4" fill="#b8ffd2"/><rect x="5" y="12" width="6" height="2" fill="#0e9c43"/></svg>`,
+      ingots: `<svg class="w-8 h-8" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="3" y="4" width="10" height="3" fill="#fcee4b"/><rect x="2" y="7" width="12" height="4" fill="#d9a81e"/><rect x="4" y="5" width="4" height="1" fill="#ffffff"/></svg>`,
+      sword: `<svg class="w-8 h-8" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="11" y="2" width="3" height="3" fill="#a259ff"/><rect x="9" y="4" width="3" height="3" fill="#4aedd9"/><rect x="7" y="6" width="3" height="3" fill="#4aedd9"/><rect x="4" y="8" width="5" height="2" fill="#875c32"/><rect x="3" y="11" width="2" height="2" fill="#6b4423"/></svg>`,
+      potion: `<svg class="w-8 h-8" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="6" y="2" width="4" height="2" fill="#875c32"/><rect x="5" y="5" width="6" height="2" fill="#b8e2f8"/><rect x="4" y="7" width="8" height="7" fill="#5ec8f8"/><rect x="5" y="8" width="2" height="3" fill="#ffffff"/></svg>`,
+      book: `<svg class="w-8 h-8" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="3" y="2" width="10" height="12" fill="#8c2d2d"/><rect x="4" y="3" width="8" height="10" fill="#f5e6c8"/><rect x="6" y="5" width="4" height="6" fill="#a259ff"/><rect x="7" y="7" width="2" height="2" fill="#fcee4b"/></svg>`,
+      hay: `<svg class="w-8 h-8" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect width="16" height="16" fill="#d9b426"/><rect x="0" y="5" width="16" height="2" fill="#b5332a"/><rect x="0" y="10" width="16" height="2" fill="#b5332a"/><rect x="3" y="2" width="2" height="2" fill="#f5db56"/><rect x="10" y="7" width="3" height="2" fill="#f5db56"/></svg>`,
+      ore: `<svg class="w-8 h-8" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect width="16" height="16" fill="#7d7d7d"/><rect x="2" y="3" width="3" height="2" fill="#222222"/><rect x="9" y="2" width="4" height="3" fill="#d8af93"/><rect x="4" y="9" width="3" height="3" fill="#fcee4b"/><rect x="10" y="10" width="3" height="2" fill="#222222"/></svg>`,
+      castle: `<svg class="w-8 h-8" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="2" y="2" width="2" height="3" fill="#9c9c9c"/><rect x="7" y="2" width="2" height="3" fill="#9c9c9c"/><rect x="12" y="2" width="2" height="3" fill="#9c9c9c"/><rect x="2" y="5" width="12" height="9" fill="#828282"/><rect x="6" y="9" width="4" height="5" fill="#4a2e16"/></svg>`
+    };
+
+    // 10 Questions tailored for 6th grade Ukrainian curriculum (Percentages)
+    const QUESTIONS = [
+      {
+        topic: "Знаходження відсотка від числа",
+        icon: ICONS.cobble,
+        question: "У Стіва в інвентарі є один повний стак (64 блоки) кругляку. На будівництво укриття він витратив 25% цих блоків. Скільки блоків кругляку залишилося у Стіва?",
+        options: ["16 блоків", "48 блоків", "32 блоки", "40 блоків"],
+        correctIndex: 1,
+        hint: "25% — це одна четверта частина числа. Спочатку знайди, скільки блоків витратив Стів, а потім відніми це число від 64.",
+        rationale: "25% від 64 становить 64 · 0,25 = 16 блоків (стільки витрачено). Тоді залишилося: 64 − 16 = 48 блоків."
+      },
+      {
+        topic: "Знаходження відсотка від числа",
+        icon: ICONS.pickaxe,
+        question: "Алмазна кирка має міцність 1561 одиницю, а залізна — 250 одиниць. Під час видобутку обсидіану залізна кирка втратила 60% своєї міцності. Скільки одиниць міцності витратила залізна кирка?",
+        options: ["100 одиниць", "125 одиниць", "150 одиниць", "190 одиниць"],
+        correctIndex: 2,
+        hint: "Зверни увагу, що у задачі питають саме про залізну кирку (250 одиниць). Помнож 250 на 0,60.",
+        rationale: "Міцність залізної кирки — 250 одиниць. 60% від 250 дорівнює 250 · 0,6 = 150 одиниць міцності."
+      },
+      {
+        topic: "Знаходження числа за його відсотком",
+        icon: ICONS.emerald,
+        question: "Алекс зібрала в шахті 18 смарагдів, що становить 30% від кількості смарагдів, необхідних для торгівлі з селянином. Скільки всього смарагдів потрібно Алекс?",
+        options: ["54 смарагди", "60 смарагдів", "48 смарагдів", "90 смарагдів"],
+        correctIndex: 1,
+        hint: "Щоб знайти ціле число за його відсотком, потрібно відоме число поділити на десятковий дріб (18 : 0,30).",
+        rationale: "Оскільки 30% = 0,3, то загальна кількість становить 18 : 0,3 = 180 : 3 = 60 смарагдів."
+      },
+      {
+        topic: "Відсоткове відношення",
+        icon: ICONS.ingots,
+        question: "У скрині зберігається 80 злитків різних металів: 32 залізних, 28 мідних, а решта — золоті. Який відсоток усіх злитків у скрині становлять золоті злитки?",
+        options: ["20%", "25%", "30%", "15%"],
+        correctIndex: 1,
+        hint: "Спочатку дізнайся, скільки золотих злитків у скрині, а потім поділи їхню кількість на 80 і помнож на 100%.",
+        rationale: "Золотих злитків: 80 − (32 + 28) = 20 штук. Їхня частка від усіх злитків: (20 / 80) · 100% = 0,25 · 100% = 25%."
+      },
+      {
+        topic: "Збільшення величини у відсотках",
+        icon: ICONS.sword,
+        question: "Після зачарування меча на «Гостроту» його базовий урон зріс із 8 одиниць до 10 одиниць. На скільки відсотків збільшився урон меча?",
+        options: ["На 20%", "На 25%", "На 12,5%", "На 80%"],
+        correctIndex: 1,
+        hint: "Знайди різницю (10 − 8 = 2) та порівняй її з початковим уроном (8 одиниць).",
+        rationale: "Урон зріс на 10 − 8 = 2 одиниці. Відносно початкових 8 одиниць це становить (2 / 8) · 100% = 25%."
+      },
+      {
+        topic: "Концентрація розчину",
+        icon: ICONS.potion,
+        question: "Для створення зілля швидкості гравець використав 45 мл води та 5 мл цукрового екстракту. Яка відсоткова концентрація цукрового екстракту в отриманому зіллі?",
+        options: ["5%", "9%", "10%", "11%"],
+        correctIndex: 2,
+        hint: "Не забудь, що загальний об'єм зілля дорівнює сумі води та екстракту (45 + 5 мл).",
+        rationale: "Загальний об'єм зілля: 45 + 5 = 50 мл. Частка цукрового екстракту: (5 / 50) · 100% = 0,1 · 100% = 10%."
+      },
+      {
+        topic: "Послідовна зміна відсотків",
+        icon: ICONS.book,
+        question: "Фермер у селищі продавав зачаровану книгу за 40 смарагдів. Після захисту селища від рейду ціна знизилася на 15%, а згодом нова ціна зросла на 10%. Скільки смарагдів тепер коштує книга?",
+        options: ["38 смарагдів", "37,4 смарагда", "36,5 смарагда", "39,6 смарагда"],
+        correctIndex: 1,
+        hint: "Зміни відбуваються по черзі: спочатку знайди ціну після знижки 15%, а потім від нової ціни обчисли +10%.",
+        rationale: "Після знижки 15%: 40 · 0,85 = 34 смарагди. Після підвищення на 10%: 34 · 1,1 = 37,4 смарагда."
+      },
+      {
+        topic: "Задача на порівняння (більше на...)",
+        icon: ICONS.hay,
+        question: "На фермі пшениці врожай становить 120 снопів сіна, що на 20% більше, ніж минулого тижня. Скільки снопів сіна було зібрано минулого тижня?",
+        options: ["96 снопів", "100 снопів", "104 снопи", "90 снопів"],
+        correctIndex: 1,
+        hint: "Минулий урожай — це 100%, а теперішній (120 снопів) становить 100% + 20% = 120%.",
+        rationale: "Якщо минулий урожай прийняти за 100%, то 120 снопів — це 120%. Отже, 1% = 1 сніп, а 100% = 100 снопів."
+      },
+      {
+        topic: "Комбінована задача (відсотки + відношення)",
+        icon: ICONS.ore,
+        question: "У печері Стів знайшов жилу руди, де було 14 блоків вугілля, що становило 35% усієї жили. Крім вугілля, у жилі було залізо та золото у відношенні 3 : 2. Скільки блоків залізної руди знайшов Стів?",
+        options: ["15,6 блока", "10,4 блока", "26 блоків", "18 блоків"],
+        correctIndex: 0,
+        hint: "Спочатку знайди загальну кількість блоків у жилі (14 : 0,35), відніми вугілля, а решту поділи на 3 + 2 = 5 частин.",
+        rationale: "Уся жила: 14 : 0,35 = 40 блоків. Залізо та золото разом: 40 − 14 = 26 блоків. На 1 частину припадає 26 : 5 = 5,2 блока. Заліза (3 частини): 5,2 · 3 = 15,6 блока."
+      },
+      {
+        topic: "Знаходження цілого за відсотком від залишку",
+        icon: ICONS.castle,
+        question: "Будівельник зводить стіну замку. Першого дня він виклав 40% усієї стіни, другого дня — 50% від залишку, а третього дня — останні 45 блоків. Скільки всього блоків знадобилося для будівництва стіни?",
+        options: ["120 блоків", "150 блоків", "180 блоків", "135 блоків"],
+        correctIndex: 1,
+        hint: "Якщо другого дня виклали 50% від залишку, то останні 45 блоків — це теж 50% від залишку!",
+        rationale: "45 блоків — це половина залишку після 1-го дня, тобто весь залишок дорівнює 45 · 2 = 90 блоків. Оскільки 1-го дня виклали 40%, то 90 блоків — це 60% стіни. Уся стіна: 90 : 0,6 = 150 блоків."
+      }
+    ];
+
+    // =========================================================================
+    // НАЛАШТУВАННЯ GOOGLE ТАБЛИЦІ (Вчитель може вставити URL сюди постійно)
+    // =========================================================================
+    const DEFAULT_GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbznyhhtfIp8tS15u-e0NfeKVw0FarxIEBo-PRhEoDKM9dXRwL8jv0PUHAWIUhweJCeu/exec"; 
+
+    // Game State
+    let playerName = "";
+    let currentIdx = 0;
+    let diamonds = 0;
+    let hearts = 3;
+    let answered = false;
+    let mistakes = [];
+
+    // DOM Elements
+    const startScreen = document.getElementById('start-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+    const hudStats = document.getElementById('hud-stats');
+
+    // Allow Enter key in player name input to start quiz
+    document.getElementById('player-name').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') startQuiz();
+    });
+
+    function toggleSheetsConfig() {
+      const panel = document.getElementById('sheets-config-panel');
+      panel.classList.toggle('hidden');
+    }
+
+    function clearNameError() {
+      document.getElementById('name-error').classList.add('hidden');
+    }
+
+    function renderHearts() {
+      const container = document.getElementById('hearts-container');
+      container.innerHTML = '';
+      for (let i = 0; i < 3; i++) {
+        const active = i < hearts;
+        container.innerHTML += `
+          <svg class="w-5 h-5" viewBox="0 0 9 9" shape-rendering="crispEdges">
+            <path d="M1 1h2v1h1v1h1V2h1V1h2v3H7v1H6v1H5v1H4V6H3V5H2V4H1V1z" fill="${active ? '#ff1e1e' : '#4a4a4a'}"/>
+            ${active ? '<rect x="2" y="2" width="1" height="1" fill="#ff9e9e"/>' : ''}
+          </svg>
+        `;
+      }
+    }
+
+    function startQuiz() {
+      const nameInput = document.getElementById('player-name');
+      const trimmedName = nameInput.value.trim();
+
+      if (!trimmedName) {
+        document.getElementById('name-error').classList.remove('hidden');
+        nameInput.focus();
+        return;
+      }
+
+      playerName = trimmedName;
+      currentIdx = 0;
+      diamonds = 0;
+      hearts = 3;
+      mistakes = [];
+      document.getElementById('diamond-count').textContent = '0';
+      renderHearts();
+
+      startScreen.classList.add('hidden');
+      resultScreen.classList.add('hidden');
+      quizScreen.classList.remove('hidden');
+      hudStats.classList.remove('hidden');
+
+      loadQuestion();
+    }
+
+    function loadQuestion() {
+      answered = false;
+      const q = QUESTIONS[currentIdx];
+
+      // Update header & XP bar
+      document.getElementById('q-current').textContent = currentIdx + 1;
+      document.getElementById('q-total').textContent = QUESTIONS.length;
+      document.getElementById('q-topic-badge').textContent = q.topic;
+      document.getElementById('xp-fill').style.width = `${((currentIdx + 1) / QUESTIONS.length) * 100}%`;
+
+      // Question text & icon
+      document.getElementById('q-icon').innerHTML = q.icon;
+      document.getElementById('q-text').textContent = q.question;
+
+      // Reset hint & feedback
+      document.getElementById('hint-box').classList.add('hidden');
+      document.getElementById('hint-text').textContent = q.hint;
+      document.getElementById('hint-btn').disabled = false;
+
+      const feedbackBox = document.getElementById('feedback-box');
+      feedbackBox.classList.add('hidden');
+      document.getElementById('next-btn').classList.add('hidden');
+
+      // Render Options
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = '';
+      const letters = ['А', 'Б', 'В', 'Г'];
+
+      q.options.forEach((optText, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'mc-option p-3.5 text-left font-medium text-sm sm:text-base flex items-center gap-3 cursor-pointer';
+        btn.innerHTML = `
+          <span class="w-7 h-7 bg-[#474747] text-white font-pixel text-xs flex items-center justify-center shrink-0">${letters[idx]}</span>
+          <span>${optText}</span>
+        `;
+        btn.onclick = () => selectAnswer(idx, btn);
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    function toggleHint() {
+      const hintBox = document.getElementById('hint-box');
+      hintBox.classList.toggle('hidden');
+    }
+
+    function selectAnswer(selectedIndex, clickedBtn) {
+      if (answered) return;
+      answered = true;
+
+      const q = QUESTIONS[currentIdx];
+      const allBtns = document.querySelectorAll('#options-container button');
+      allBtns.forEach(b => b.classList.add('locked'));
+
+      const feedbackBox = document.getElementById('feedback-box');
+      const feedbackTitle = document.getElementById('feedback-title');
+      const feedbackText = document.getElementById('feedback-text');
+
+      if (selectedIndex === q.correctIndex) {
+        clickedBtn.classList.add('selected-correct');
+        diamonds++;
+        document.getElementById('diamond-count').textContent = diamonds;
+
+        feedbackBox.className = 'mb-5 p-4 border-2 bg-[#dff2cf] border-[#4e7529] text-sm sm:text-base';
+        feedbackTitle.className = 'font-bold mb-1 text-[#2b520d]';
+        feedbackTitle.textContent = '💎 Чудово! Ти добув алмаз!';
+      } else {
+        clickedBtn.classList.add('selected-wrong');
+        allBtns[q.correctIndex].classList.add('selected-correct');
+        if (hearts > 0) hearts--;
+        renderHearts();
+
+        mistakes.push({
+          number: currentIdx + 1,
+          question: q.question,
+          yourAnswer: q.options[selectedIndex],
+          correctAnswer: q.options[q.correctIndex],
+          rationale: q.rationale
+        });
+
+        feedbackBox.className = 'mb-5 p-4 border-2 bg-[#fad9d9] border-[#9e2a2a] text-sm sm:text-base';
+        feedbackTitle.className = 'font-bold mb-1 text-[#7d1919]';
+        feedbackTitle.textContent = '💥 Ой! Кріпер підірвав розрахунки!';
+      }
+
+      feedbackText.textContent = q.rationale;
+      feedbackBox.classList.remove('hidden');
+
+      const nextBtn = document.getElementById('next-btn');
+      nextBtn.textContent = currentIdx === QUESTIONS.length - 1 ? 'ЗАВЕРШИТИ КВЕСТ ★' : 'ДАЛІ ➔';
+      nextBtn.classList.remove('hidden');
+    }
+
+    function nextQuestion() {
+      currentIdx++;
+      if (currentIdx < QUESTIONS.length) {
+        loadQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      quizScreen.classList.add('hidden');
+      resultScreen.classList.remove('hidden');
+
+      const percent = Math.round((diamonds / QUESTIONS.length) * 100);
+      document.getElementById('result-player-name').textContent = playerName;
+      document.getElementById('final-diamonds').textContent = `${diamonds}/${QUESTIONS.length}`;
+      document.getElementById('final-percent').textContent = `${percent}%`;
+      document.getElementById('final-wrong').textContent = mistakes.length;
+
+      const trophyIcon = document.getElementById('trophy-icon');
+      const rankTitle = document.getElementById('rank-title');
+      const rankSubtitle = document.getElementById('rank-subtitle');
+
+      let rankName = '';
+      if (diamonds >= 9) {
+        rankName = 'Незеритовий гросмейстер';
+        rankTitle.textContent = 'ЗВАННЯ: НЕЗЕРИТОВИЙ ГРОСМЕЙСТЕР';
+        rankSubtitle.textContent = 'Неймовірний результат! Ти володієш відсотками краще, ніж зачарований верстак.';
+        trophyIcon.innerHTML = `<svg class="w-20 h-20" viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="5" y="1" width="6" height="2" fill="#aefcf2"/><rect x="3" y="3" width="10" height="2" fill="#4aedd9"/><rect x="2" y="5" width="12" height="5" fill="#2cc4b2"/><rect x="4" y="4" width="3" height="3" fill="#ffffff"/><rect x="3" y="10" width="10" height="2" fill="#1d9688"/><rect x="5" y="12" width="6" height="2" fill="#157065"/></svg>`;
+      } else if (diamonds >= 6) {
+        rankName = 'Алмазний шахтар';
+        rankTitle.textContent = 'ЗВАННЯ: АЛМАЗНИЙ ШАХТАР';
+        rankSubtitle.textContent = 'Дуже гарна робота! Ти впевнено орієнтуєшся у відсотках, а дрібні помилки легко виправити.';
+        trophyIcon.innerHTML = ICONS.emerald.replace('w-8 h-8', 'w-20 h-20');
+      } else {
+        rankName = 'Дослідник шахт';
+        rankTitle.textContent = 'ЗВАННЯ: ДОСЛІДНИК ШАХТ';
+        rankSubtitle.textContent = 'Гарний початок! Переглянь пояснення до складних завдань нижче та спробуй пройти квест ще раз.';
+        trophyIcon.innerHTML = ICONS.pickaxe.replace('w-8 h-8', 'w-20 h-20');
+      }
+
+      // Send result to Google Sheets if configured
+      sendResultsToGoogleSheets({
+        timestamp: new Date().toLocaleString('uk-UA'),
+        studentName: playerName,
+        diamonds: diamonds,
+        totalQuestions: QUESTIONS.length,
+        percentage: percent + '%',
+        rank: rankName,
+        wrongQuestions: mistakes.length > 0 ? mistakes.map(m => `№${m.number}`).join(', ') : 'Немає'
+      });
+
+      const reviewSection = document.getElementById('review-section');
+      const reviewList = document.getElementById('review-list');
+      reviewList.innerHTML = '';
+
+      if (mistakes.length > 0) {
+        reviewSection.classList.remove('hidden');
+        mistakes.forEach(m => {
+          const item = document.createElement('div');
+          item.className = 'bg-[#d9d9d9] border-2 border-[#7a7a7a] p-3 text-xs sm:text-sm';
+          item.innerHTML = `
+            <p class="font-bold text-gray-900 mb-1">Завдання №${m.number}: ${m.question}</p>
+            <p class="text-[#8f1d1d]">Твоя відповідь: <span class="line-through">${m.yourAnswer}</span></p>
+            <p class="text-[#265409] font-semibold">Правильно: ${m.correctAnswer}</p>
+            <p class="text-gray-700 mt-1 text-xs">${m.rationale}</p>
+          `;
+          reviewList.appendChild(item);
+        });
+      } else {
+        reviewSection.classList.add('hidden');
+      }
+    }
+
+    async function sendResultsToGoogleSheets(payloadData) {
+      const customUrl = document.getElementById('sheets-url-input').value.trim();
+      const scriptUrl = customUrl || DEFAULT_GOOGLE_SCRIPT_URL;
+      const banner = document.getElementById('sheets-status-banner');
+      const statusIcon = document.getElementById('sheets-status-icon');
+      const statusText = document.getElementById('sheets-status-text');
+
+      if (!scriptUrl) {
+        banner.classList.add('hidden');
+        return;
+      }
+
+      banner.className = 'max-w-md mx-auto mb-5 p-3 border-2 bg-[#fdf6d8] border-[#c79a1e] text-[#594100] text-xs sm:text-sm font-medium flex items-center justify-center gap-2';
+      statusIcon.textContent = '⏳';
+      statusText.textContent = 'Відправка результату в Google Таблицю...';
+      banner.classList.remove('hidden');
+
+      try {
+        await fetch(scriptUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payloadData)
+        });
+
+        banner.className = 'max-w-md mx-auto mb-5 p-3 border-2 bg-[#dff2cf] border-[#4e7529] text-[#2b520d] text-xs sm:text-sm font-medium flex items-center justify-center gap-2';
+        statusIcon.textContent = '✅';
+        statusText.textContent = 'Результат успішно збережено в Google Таблицю!';
+      } catch (error) {
+        banner.className = 'max-w-md mx-auto mb-5 p-3 border-2 bg-[#fad9d9] border-[#9e2a2a] text-[#7d1919] text-xs sm:text-sm font-medium flex items-center justify-center gap-2';
+        statusIcon.textContent = '⚠️';
+        statusText.textContent = 'Не вдалося відправити результат. Перевірте URL скрипту.';
+      }
+    }
+
+    function restartQuiz() {
+      startQuiz();
+    }
+  </script>
+</body>
+</html>
